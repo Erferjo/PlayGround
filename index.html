@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#07120e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>STRANGEVILLE — Every House Is a Doom Level</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-state="splash">
+  <canvas id="scene" aria-label="Game view"></canvas>
+
+  <div id="fx" aria-hidden="true">
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+    <div id="damageFlash"></div>
+  </div>
+
+  <!-- NEIGHBORHOOD CHROME -->
+  <div id="mapUI">
+    <header id="topbar">
+      <div class="brand">
+        <div class="plumbob small" aria-hidden="true"><i></i><i></i></div>
+        <div class="brand-copy">
+          <h1>STRANGEVILLE</h1>
+          <p>EST. 2004 <span>·</span> POPULATION: DOOMED</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="clock" id="clock">SAT 2:14 AM</div>
+        <button class="icon-btn" id="soundBtn" aria-label="Toggle sound" title="Sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5c1.4 1.9 1.4 5.1 0 7M18.5 6c2.8 3.3 2.8 8.7 0 12"/></svg>
+        </button>
+        <button class="icon-btn tilt-btn" id="tiltBtn" aria-label="Toggle tilt controls" title="Tilt controls">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 18h4"/><path class="tilt-arrow" d="M3 9l2-2 2 2M3 15l2 2 2-2M19 9l-2-2-2 2M19 15l-2 2-2-2"/></svg>
+          <span class="status-dot"></span>
+        </button>
+        <button class="funds" id="fundsBtn" aria-label="Neighborhood progress">
+          <span>§</span><b id="funds">6,660</b><em id="clearedCount">0/6</em>
+        </button>
+      </div>
+    </header>
+
+    <div id="mapHint" class="map-hint">
+      <span class="dot"></span> TAP A LOT TO INSPECT
+      <span class="sep">/</span> TAP AGAIN TO ENTER
+    </div>
+
+    <aside id="lotCard" aria-live="polite">
+      <div class="card-top">
+        <span class="lot-no" id="lotNo">LOT 13</span>
+        <span class="threat" id="threatPips" aria-label="Threat level"></span>
+      </div>
+      <h2 id="houseName">Goth Manor</h2>
+      <p class="family" id="familyName">The Goths</p>
+      <p class="tagline" id="houseTagline">Gloomy. Spooky. Structurally cursed.</p>
+      <div class="level-strip">
+        <span class="key-ico" aria-hidden="true">⚿</span>
+        <span id="levelName">THE GOTH BASEMENT</span>
+      </div>
+      <div class="card-stats">
+        <div><b id="statEnemies">7</b><span>DEMONS</span></div>
+        <div><b id="statKey">1</b><span>HOUSE KEY</span></div>
+        <div><b id="statExit">1</b><span>PORTAL</span></div>
+      </div>
+      <button id="enterBtn" class="enter-btn">
+        <span>ENTER HOUSE</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </button>
+      <div class="card-cleared" id="cardCleared">CLEARED · REPLAY AVAILABLE</div>
+    </aside>
+
+    <div id="mapToast" class="toast" role="status"></div>
+    <div id="rotateNote" class="rotate-note">For the best view, turn your device sideways.</div>
+  </div>
+
+  <!-- FIRST-PERSON HUD -->
+  <div id="hud">
+    <div class="hud-top">
+      <div class="vitals">
+        <div class="vital health">
+          <span class="vital-label">HEALTH</span>
+          <div class="bar"><i id="healthBar"></i></div>
+          <b id="healthVal">100</b>
+        </div>
+        <div class="vital ammo">
+          <span class="vital-label">PLUMBUM</span>
+          <div class="bar"><i id="ammoBar"></i></div>
+          <b id="ammoVal">24</b>
+        </div>
+      </div>
+      <div class="objective">
+        <span class="obj-label" id="levelHeader">LOT 13 · GOTH MANOR</span>
+        <span class="obj-text" id="objectiveText">Find the house key.</span>
+      </div>
+      <div class="hud-right">
+        <button class="icon-btn" id="pauseBtn" aria-label="Pause">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>
+        </button>
+        <div class="minimap-wrap"><canvas id="minimap" width="128" height="128"></canvas></div>
+      </div>
+    </div>
+
+    <div id="keyToast" class="key-toast"><span>⚿</span><b>HOUSE KEY</b><em>Portal unlocked</em></div>
+    <div id="toast" class="toast" role="status"></div>
+
+    <div id="touchUI">
+      <div id="moveZone" aria-label="Movement joystick">
+        <div id="moveStick" class="move-stick"><i></i></div>
+      </div>
+      <button id="fireBtn" aria-label="Fire weapon">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l18 34H6z"/></svg>
+        <span>FIRE</span>
+      </button>
+    </div>
+
+    <div class="desktop-hint"><b>WASD</b> move <span>·</span> <b>DRAG</b> look <span>·</span> <b>CLICK</b> fire <span>·</span> <b>ESC</b> pause</div>
+  </div>
+
+  <!-- OVERLAYS -->
+  <div id="splash" class="overlay splash">
+    <div class="splash-inner">
+      <div class="splash-badge">AN OMGITHUB ORIGINAL</div>
+      <div class="splash-plumbob" aria-hidden="true"><span></span></div>
+      <h1>STRANGE<br><span>VILLE</span></h1>
+      <p class="splash-sub">THE SIMS NEIGHBORHOOD WHERE<br>EVERY HOUSE IS A DOOM LEVEL</p>
+      <div class="splash-rule"><i></i><b>☠</b><i></i></div>
+      <button id="playBtn" class="play-btn">PLAY</button>
+      <p class="splash-note">Touch controls · Optional tilt aiming · Requests motion access on iOS</p>
+      <div class="splash-chips">
+        <span>6 HAUNTED LOTS</span>
+        <span>NO LOADING</span>
+        <span>HEADPHONES RECOMMENDED</span>
+      </div>
+    </div>
+    <div class="splash-footer"><span>© 2004—2026 STRANGEVILLE HOA</span><span>NOT AFFILIATED WITH ANYONE'S BASEMENT</span></div>
+  </div>
+
+  <div id="pauseMenu" class="overlay menu">
+    <div class="menu-panel">
+      <span class="menu-kicker">PAUSED</span>
+      <h2>TAKING A<br><span>BREATHER?</span></h2>
+      <p class="menu-sub">The demons will wait. They're polite like that.</p>
+      <button class="menu-btn primary" id="resumeBtn">RESUME</button>
+      <button class="menu-btn" id="pauseTiltBtn"><span>TILT AIM</span><b id="pauseTiltState">OFF</b></button>
+      <button class="menu-btn" id="pauseSoundBtn"><span>SOUND</span><b id="pauseSoundState">ON</b></button>
+      <button class="menu-btn danger" id="leaveBtn"><span>LEAVE HOUSE</span><b>↩</b></button>
+      <p class="menu-tip" id="tiltTip">Tilt your device to aim. Permission is requested from this button on iOS.</p>
+    </div>
+  </div>
+
+  <div id="resultMenu" class="overlay menu">
+    <div class="menu-panel result-panel">
+      <span class="menu-kicker" id="resultKicker">HOUSE CLEARED</span>
+      <h2 id="resultTitle">GOTH MANOR<br><span>PURGED</span></h2>
+      <p class="menu-sub" id="resultSub">The HOA thanks you for your service.</p>
+      <div class="result-stats">
+        <div><b id="resKills">0</b><span>DEMONS BANISHED</span></div>
+        <div><b id="resTime">0:00</b><span>TIME IN HELL</span></div>
+        <div><b id="resHealth">100</b><span>HEALTH LEFT</span></div>
+      </div>
+      <button class="menu-btn primary" id="nextBtn">NEXT LOT</button>
+      <button class="menu-btn" id="mapBtn">BACK TO NEIGHBORHOOD</button>
+    </div>
+  </div>
+
+  <div id="bootError" class="boot-error" role="alert"></div>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
