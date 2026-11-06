@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101117">
+  <title>Mythos &amp; Memory — A Choose Your Legend RPG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="wordmark" href="#" aria-label="Mythos and Memory home" onclick="returnToTitle()">
+        <span class="brand-mark">✦</span><span>MYTHOS <i>&amp;</i> MEMORY</span>
+      </a>
+      <div class="topbar-center"><span class="live-dot"></span> YOUR STORY, YOUR LEGEND</div>
+      <div class="topbar-actions">
+        <button class="icon-button" onclick="toggleSound()" title="Toggle ambience" aria-label="Toggle ambience"><span id="sound-icon">♫</span></button>
+        <button class="text-button" onclick="showHelp()">HOW TO PLAY <span>↗</span></button>
+      </div>
+    </header>
+    <main id="app"></main>
+    <footer class="site-footer"><span>AN INTERACTIVE TALE</span><span>✦ &nbsp; EVERY CHOICE LEAVES A MARK &nbsp; ✦</span><span>VOL. I — THE FORGOTTEN AGE</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modal-root"></div>
+  <script src="game.js"></script>
+</body>
+</html>
