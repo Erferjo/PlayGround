@@ -71,7 +71,7 @@ const campaigns = {
     ]}
   ],endings:{dawn:{title:'The Open Road',text:'The people cross the threshold into the morning. Nima’s grandmother sees the desert and laughs at the sheer size of the world. The city fades behind you, but its people are no longer lost.'},sanctuary:{title:'A Place for the Unwritten',text:'The city opens its gates to every traveler the desert has swallowed. Nima draws new roads on the map, while her grandmother tells stories no archive could hold.'},map:{title:'The Cartographer’s Promise',text:'Nima keeps the map, but leaves the final page blank. The city becomes a promise that can change with every hand that holds it—and she invites you to help draw the next line.'}}}
 };
-const upgrades=[{id:'vitality',name:'Hardy Constitution',icon:'♥',cost:18,desc:'+2 maximum vitality',type:'hp'},{id:'focus',name:'Quiet Focus',icon:'✦',cost:16,desc:'+2 maximum will',type:'will'},{id:'fortune',name:'Fortune’s Favor',icon:'◈',cost:22,desc:'+10 starting gold next tale',type:'gold'}];
+const upgrades=[{id:'vitality',name:'Hardy Constitution',icon:'♥',cost:18,desc:'+2 maximum vitality',type:'hp'},{id:'focus',name:'Quiet Focus',icon:'✦',cost:16,desc:'+2 maximum will',type:'will'},{id:'fortune',name:'Fortune’s Favor',icon:'◈',cost:22,desc:'Find 10 extra gold now',type:'gold'}];
 let state=null, selectedCampaign='ash', selectedHero='sentinel', toastTimer;
 const itemDetails={
   'Cinderglass Shard':{icon:'◇',desc:'A warm fragment of the first queen’s spell.',bonus:'Equipped: +1 max will',type:'will'},
@@ -106,15 +106,6 @@ function applyEffects(e){
  if(e.flag)state.flags[e.flag]=true;
  if(e.journal)state.journal.unshift(e.journal);
 }
-function choose(index){
- const camp=campaigns[state.campaign],node=camp.nodes[state.node],choice=node.choices[index];if(!choice)return;
- if(choice.requiresGold&&state.gold<choice.requiresGold){toast(`You need ${choice.requiresGold} gold for this choice.`);return;}
- if(choice.requiresFlag&&!state.flags[choice.requiresFlag]){toast('A choice from an earlier chapter will open this path.');return;}
- if(choice.requiresItem&&!state.items.includes(choice.requiresItem)){toast(`You need ${choice.requiresItem} to take this path.`);return;}
- applyEffects(choice.effect);state.feedback=choice.feedback||'';
- if(choice.ending){state.done=true;state.ending=choice.ending;}else{state.node=choice.next;}
- save();renderGame();window.scrollTo({top:0,behavior:'smooth'});
-}
 function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500);}
 function toggleSound(){const el=document.getElementById('sound-icon');el.textContent=el.textContent==='♫'?'♪':'♫';toast('The tale is best enjoyed with your own soundtrack.');}
 function showHelp(){document.getElementById('modal-root').innerHTML=`<div class="modal-backdrop" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><button class="close-button" onclick="closeModal()">×</button><div class="eyebrow">A FIELD GUIDE</div><h2>How to play</h2><p>Choose your history and hero, then read closely: the words you choose shape who trusts you, what you discover, and how each tale ends.</p><ul><li><b>Vitality</b> tracks your health. Dangerous choices may cost a point, but it never falls below one.</li><li><b>Will</b> is your resolve and magic. Spend gold to buy permanent upgrades for this adventure.</li><li><b>Items</b> are found through decisions. Equip one to reveal its small passive bonus.</li><li>Your progress is saved in this browser automatically. Replay a different history to discover its other endings.</li></ul><div class="modal-actions"><button class="primary-button" onclick="closeModal()">UNDERSTOOD</button></div></div></div>`;}
@@ -132,10 +123,10 @@ function choose(index){
 function equipItem(name){
  const next=state.equipped===name?null:name,prev=state.equipped;
  const adjust=(item,sign)=>{const d=itemDetails[item];if(!d)return;if(d.type==='hp'){state.maxHp=Math.max(1,state.maxHp+sign);state.hp=Math.min(state.maxHp,state.hp+sign);}else if(d.type==='will'){state.maxWill=Math.max(0,state.maxWill+sign);state.will=Math.min(state.maxWill,state.will+sign);}};
- if(prev)adjust(prev,-1);state.equipped=next;if(next){adjust(next,1);if(next==='Pilgrim’s Key')state.gold++;}
+ if(prev)adjust(prev,-1);state.equipped=next;if(next)adjust(next,1);
  save();renderGame();if(next)toast(`${next} equipped.`);
 }
-function buyUpgrade(id){const up=upgrades.find(x=>x.id===id);if(!up||state.upgrades.includes(id))return;if(state.gold<up.cost){toast(`You need ${up.cost} gold for this upgrade.`);return;}state.gold-=up.cost;state.upgrades.push(id);if(up.type==='hp'){state.maxHp+=2;state.hp+=2;}if(up.type==='will'){state.maxWill+=2;state.will+=2;}save();renderGame();toast(`${up.name} unlocked.`);}
+function buyUpgrade(id){const up=upgrades.find(x=>x.id===id);if(!up||state.upgrades.includes(id))return;if(state.gold<up.cost){toast(`You need ${up.cost} gold for this upgrade.`);return;}state.gold-=up.cost;state.upgrades.push(id);if(up.type==='hp'){state.maxHp+=2;state.hp+=2;}if(up.type==='will'){state.maxWill+=2;state.will+=2;}if(up.type==='gold')state.gold+=10;save();renderGame();toast(`${up.name} unlocked.`);}
 function artClass(){return campaigns[state.campaign].art;}
 function renderGame(){
  if(!state||!campaigns[state.campaign])return renderTitle();
